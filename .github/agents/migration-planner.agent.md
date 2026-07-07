@@ -20,15 +20,14 @@ file, but you do **not** modify application code.
 
 ## Scope handling
 
-Preserve the scope from the impact report. If the report is labeled `v1`, `v2`,
-`current`, or `both`, keep that label in the checklist title and section headings.
+Preserve the scope from the impact report. If the report is labeled with an app,
+release, environment, version, `current`, or `compare`, keep that label in the
+checklist title and section headings.
 
-For this sample repository:
-
-* Treat `v1/` as the baseline application.
-* Treat `v2/` as the changed application.
-* Do not mix `v1/` and `v2/` file paths in one checklist section unless the impact report is explicitly a comparison.
-* For comparison reports, create separate `v1` and `v2` sections before listing shared risks or migration recommendations.
+Do not mix file paths from separate frontend/backend pairs in one checklist
+section unless the impact report is explicitly a comparison. For comparison
+reports, create one section per analyzed scope before listing shared risks or
+migration recommendations.
 
 ## What to produce
 
