@@ -1,25 +1,25 @@
 ---
 name: impact
-description: Blast radius of changing a type, file, or endpoint across the Angular + .NET stacks.
+description: Analyze blast radius for a type, file, or endpoint across Angular and .NET.
 agent: Impact Analyst
-argument-hint: a type, file, or endpoint (e.g. CustomerDto, order.service.ts, /api/orders/{id})
+argument-hint: changed=... [scope=...]
 ---
 
-Run a cross-stack impact analysis for: **${input:changed:the type, file, or endpoint that changed}**
+# Impact
 
-1. Locate the Angular source root and the .NET source root in this workspace.
-2. Run the impact-analysis engine:
-   ```
-   python .github/skills/impact-analysis/scripts/impact_of_change.py \
-     --frontend <angular-root> --backend <dotnet-root> \
-     --changed "${input:changed}" --out ./.impact-out --refresh
-   ```
-3. Read `./.impact-out/impact.json` and report, grouped as:
-   - **Backend affected** — controllers, services, DTOs, projects.
-   - **Frontend affected** — services, components, modules (reverse-import closure).
-   - **Cross-stack path** — the call → route → controller chain that links them.
-4. Surface `unmatchedFrontendCalls` and `unusedEndpoints`, then end with the
+## Inputs
+
+* ${input:changed}: (Required) Type, file, or endpoint to analyze.
+* ${input:scope:auto}: (Optional, defaults to auto) App, release, environment, version, or `compare`.
+
+## Requirements
+
+1. Analyze `${input:changed}` by following the `Impact Analyst` workspace and scope selection rules.
+2. Run the impact-analysis engine for the selected frontend/backend pair, or for
+   each pair when the request is a comparison.
+3. Use scope-specific output folders so cached artifacts from different pairs do
+   not collide.
+4. Report the analyzed scope, affected backend files, affected frontend files,
+   cross-stack paths, unmatched frontend calls, and unused endpoints.
+5. Flag `loose` or wildcard (`*`) matches as lower confidence, then end with the
    "Verify before you trust it" checklist.
-
-Keep it concise, quote exact file paths and routes, and flag any `loose` or
-wildcard (`*`) matches as lower-confidence.

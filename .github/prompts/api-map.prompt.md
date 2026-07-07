@@ -1,23 +1,23 @@
 ---
 name: api-map
-description: Full frontend-to-backend API map — every Angular HttpClient call mapped to its .NET controller/action.
+description: Map Angular HTTP calls to .NET controller endpoints.
 agent: Impact Analyst
+argument-hint: '[scope=...]'
 ---
 
-Produce the complete cross-stack API map for this workspace — an onboarding /
-architecture artifact.
+# API Map
 
-1. Locate the Angular and .NET source roots. Run the engine's analyzers + linker
-   (same commands as `/unused-endpoints`), or reuse `./.impact-out` if it is fresh.
-2. From `links.json` → `crossEdges`, build a table **grouped by controller**, with
-   columns:
-   - **Endpoint** (verb + path)
-   - **Controller.Action**
-   - **Calling Angular file(s)**
-   - **Match confidence** (`exact` / `param` / `loose`)
-3. Add a short summary line: number of endpoints, number linked, and **coverage**
-   (% of endpoints with at least one frontend caller).
-4. At the end, list any endpoints with **no** caller and any calls with **no**
-   endpoint.
+## Inputs
 
-Make it scannable, and offer to save it as `api-map.md`.
+* ${input:scope:auto}: (Optional, defaults to auto) App, release, environment, version, or `compare`.
+
+## Requirements
+
+1. Follow the `Impact Analyst` workspace and scope selection rules.
+2. Build or reuse a fresh model for the selected scope-specific output folder.
+3. From `links.json`, use `crossEdges` to build a table grouped by controller.
+4. Include endpoint, controller action, calling Angular files, and match
+   confidence in the table.
+5. Add coverage using endpoint count and linked endpoint count.
+6. List unused endpoints and unmatched frontend calls at the end.
+7. Offer to save the result as `api-map-<scope>.md` when the user wants a file.

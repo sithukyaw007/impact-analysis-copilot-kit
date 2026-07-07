@@ -12,7 +12,7 @@ frontend.json and links.json under --out if they are missing or --refresh is set
 
 Usage:
   python impact_of_change.py --frontend <angular-src> --backend <dotnet-src>
-         --changed "CustomerDto" --out ./.impact-out [--refresh] [--pretty]
+                 --changed "CustomerDto" --out ./.impact-out/<scope> [--refresh] [--pretty]
 
 --changed accepts a type/class name, a file path, or an endpoint path
 (e.g. "CustomerDto", "order.service.ts", "/api/orders/{id}").

@@ -10,14 +10,14 @@ description: >-
   which controller does this call hit, who consumes this endpoint / DTO.
 ---
 
-# Angular ↔ .NET Impact-Analysis Engine
+# Angular and .NET Impact-Analysis Engine
 
 This skill turns Copilot from *guessing* about dependencies into *reporting* on
 them. It runs deterministic static-analysis scripts over the Angular frontend
 and the .NET (Core) backend, builds a real dependency model, links the two
 stacks by matching HTTP calls to API routes, and then computes the blast radius
-of a proposed change. Copilot's job is to **orchestrate the scripts and explain
-the results in business terms** — not to infer the relationships itself.
+of a proposed change. Copilot's job is to orchestrate the scripts and explain
+the results in business terms, not to infer the relationships itself.
 
 ## When to use this skill
 
@@ -30,12 +30,12 @@ especially across the frontend/backend boundary:
 - "Show the dependency graph / affected components for this change."
 - "Which endpoints are unused? Which frontend calls have no matching backend route?"
 
-Do **not** use it for single-file questions, code authoring, or formatting —
-those don't need the dependency model.
+Do **not** use it for single-file questions, code authoring, or formatting
+because those requests do not need the dependency model.
 
 ## Prerequisites
 
-- **Python 3.8+** on PATH (the analyzers use only the standard library — no `pip install` required).
+- **Python 3.8+** on PATH (the analyzers use only the standard library, so no `pip install` is required).
 - A **multi-root VS Code workspace** that contains *both* the Angular frontend and the .NET backend, so all relevant code is on disk. Cross-stack linking is only as complete as the code the workspace can see.
 - Optional, for higher fidelity (see [methodology](./references/methodology.md)):
   - Node.js + `npx madge` for a richer Angular import graph.
@@ -48,13 +48,27 @@ results are inspectable and cacheable:
 
 | Step | Script | Produces |
 |------|--------|----------|
-| 1 | [`analyze_dotnet.py`](./scripts/analyze_dotnet.py) | Projects, project/package references, API endpoints (controller + action routes + verbs), defined types, DI edges, type references → `backend.json` |
-| 2 | [`analyze_angular.py`](./scripts/analyze_angular.py) | Components/services/modules, import graph, and every `HttpClient` call with its URL → `frontend.json` |
-| 3 | [`link_cross_stack.py`](./scripts/link_cross_stack.py) | Frontend HTTP call ↔ backend route matches, plus unmatched calls and unused endpoints → `links.json` |
-| 4 | [`impact_of_change.py`](./scripts/impact_of_change.py) | Given a changed file / type / endpoint, the downstream affected components across **both** stacks → `impact.md` + `impact.json` |
+| 1 | [`analyze_dotnet.py`](./scripts/analyze_dotnet.py) | Projects, project references, endpoints, defined types, DI edges, and type references in `backend.json`. |
+| 2 | [`analyze_angular.py`](./scripts/analyze_angular.py) | Components, services, modules, imports, and `HttpClient` calls in `frontend.json`. |
+| 3 | [`link_cross_stack.py`](./scripts/link_cross_stack.py) | Frontend HTTP calls matched to backend routes, plus gaps in `links.json`. |
+| 4 | [`impact_of_change.py`](./scripts/impact_of_change.py) | Downstream affected components in `impact.md` and `impact.json`. |
 
-`impact_of_change.py` is the entry point for most questions — it runs steps 1–3
+`impact_of_change.py` is the entry point for most questions. It runs steps 1-3
 automatically if the JSON artifacts aren't already present.
+
+## Scope and output guidance
+
+Run the scripts once per selected frontend/backend pair. In workspaces with
+multiple apps, releases, environments, or versions, never reuse one output folder
+across unrelated pairs. Use a stable scope slug so cached artifacts remain easy
+to inspect, for example:
+
+* `./.impact-out/current`
+* `./.impact-out/<app-name>`
+* `./.impact-out/<release-or-environment>`
+
+When comparing pairs, run each pair separately and compare the resulting JSON or
+Markdown reports.
 
 ## Usage
 
@@ -65,7 +79,7 @@ python impact_of_change.py \
   --frontend <path-to-angular-src> \
   --backend  <path-to-dotnet-src> \
   --changed  "CustomerDto" \
-  --out      ./.impact-out
+  --out      ./.impact-out/<scope>
 ```
 
 `--changed` accepts any of:
@@ -76,21 +90,21 @@ python impact_of_change.py \
 To (re)generate just the model without an impact query:
 
 ```bash
-python analyze_dotnet.py  --root <backend-src>  --out ./.impact-out/backend.json
-python analyze_angular.py --root <frontend-src> --out ./.impact-out/frontend.json
-python link_cross_stack.py --backend ./.impact-out/backend.json \
-       --frontend ./.impact-out/frontend.json --out ./.impact-out/links.json
+python analyze_dotnet.py  --root <backend-src>  --out ./.impact-out/<scope>/backend.json
+python analyze_angular.py --root <frontend-src> --out ./.impact-out/<scope>/frontend.json
+python link_cross_stack.py --backend ./.impact-out/<scope>/backend.json \
+  --frontend ./.impact-out/<scope>/frontend.json --out ./.impact-out/<scope>/links.json
 ```
 
 ## What to do with the output (instructions for the agent)
 
 1. Run `impact_of_change.py` with the changed symbol/file the user named.
-2. Read `impact.json` and summarise **in business terms**, grouped as:
-   - **Backend affected** — controllers, services, DTOs, projects.
-   - **Frontend affected** — services, components, modules (including the reverse-import closure).
-   - **Cross-stack path** — the exact call → route → controller chain that links them.
-3. Always surface the linker's **`unmatchedFrontendCalls`** and **`unusedEndpoints`** — they reveal gaps the heuristics couldn't resolve and are often the most useful findings.
-4. Present a short **"verify before you trust it"** checklist (see fidelity notes) — this is heuristic static analysis, not a compiler.
+2. Read `impact.json` and summarize in business terms, grouped as:
+  - Backend affected, including controllers, services, DTOs, and projects.
+  - Frontend affected, including services, components, and modules in the reverse-import closure.
+  - Cross-stack paths, including the exact call to route to controller chain.
+3. Always surface the linker's `unmatchedFrontendCalls` and `unusedEndpoints`. They reveal gaps the heuristics could not resolve and are often the most useful findings.
+4. Present a short "verify before you trust it" checklist. This is heuristic static analysis, not a compiler.
 
 ## Fidelity & limitations (read before relying on results)
 
@@ -104,13 +118,13 @@ It can miss:
 
 **Always verify** high-stakes conclusions against the compiler, the app's tests,
 and a quick search. For production-grade fidelity, escalate the backend to a
-Roslyn analyzer or `dotnet build -graph`, and the frontend to `madge` — see
+Roslyn analyzer or `dotnet build -graph`, and the frontend to `madge`. See
 [references/methodology.md](./references/methodology.md).
 
 ## Governance notes (for regulated / enterprise use)
 
 - The scripts perform **read-only static analysis**. They parse source text and emit JSON; they do **not** build, execute, or modify the target application.
-- No network calls and no third-party packages — standard library only — so they are safe to run in locked-down or air-gapped environments.
+- No network calls and no third-party packages. They use the standard library only, so they are safe to run in locked-down or air-gapped environments.
 - Review and pin the scripts before adding them to a shared repository, and treat any future high-fidelity add-ons (Roslyn packages, `madge`) as normal supply-chain dependencies.
 
 ## Examples

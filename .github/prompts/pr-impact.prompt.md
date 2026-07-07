@@ -1,27 +1,28 @@
 ---
 name: pr-impact
-description: Combined blast radius of your current uncommitted changes across both stacks — a PR-readiness view.
+description: Analyze current working changes for cross-stack PR readiness.
 agent: Impact Analyst
-argument-hint: (optional) a base branch/ref to diff against, e.g. origin/main
+argument-hint: '[baseRef=origin/main] [scope=...]'
 ---
 
-Analyse the impact of the **current working changes** in this workspace. If a base
-ref is given in the chat input, diff against it; otherwise diff the uncommitted
-working tree.
+# PR Impact
 
-1. Use the #tool:changes tool (or `git diff --name-only`) to list the changed files.
-2. Locate the Angular and .NET source roots. Run the engine once with `--refresh`
-   to build the model, then reuse the cached model for the remaining items:
-   ```
-   python .github/skills/impact-analysis/scripts/impact_of_change.py \
-     --frontend <angular-root> --backend <dotnet-root> \
-     --changed "<changed file or symbol>" --out ./.impact-out
-   ```
-   Run it for each changed `.cs` type/file and each changed `.ts` file.
-3. Merge into a single report: the de-duplicated union of **Backend affected** and
-   **Frontend affected**, plus every **Cross-stack path** touched.
-4. Put the **highest-risk items first** — anything touched by multiple changes, and
-   any breaking DTO / endpoint change.
-5. End with the "Verify before you trust it" checklist.
+## Inputs
 
-Write it so a reviewer can skim the blast radius in under a minute.
+* ${input:baseRef:working-tree}: (Optional, defaults to working-tree) Base branch or ref to diff against.
+* ${input:scope:auto}: (Optional, defaults to auto) App, release, environment, version, or `compare`.
+
+## Requirements
+
+1. Use available changes tooling or `git diff --name-only` to list changed files.
+   If the provided `baseRef` is not `working-tree`, diff against that ref.
+   Otherwise use the uncommitted working tree.
+2. Follow the `Impact Analyst` workspace and scope selection rules. If changes
+   span multiple frontend/backend pairs, analyze each pair separately.
+3. Run the impact-analysis engine for each relevant `.cs` type or file and each
+   changed `.ts` file that participates in the selected pair.
+4. Merge results into a single reviewer-friendly report with de-duplicated
+   backend files, frontend files, and cross-stack paths.
+5. Put the highest-risk items first, especially breaking DTO or endpoint changes
+   and items touched by multiple changes.
+6. End with the "Verify before you trust it" checklist.

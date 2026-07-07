@@ -2,26 +2,22 @@
 name: unused-endpoints
 description: Sweep for dead API routes and frontend calls that have no matching backend route.
 agent: Impact Analyst
+argument-hint: '[scope=...]'
 ---
 
-Do an integration-gap sweep across the Angular + .NET stacks.
+# Unused Endpoints
 
-1. Locate the Angular and .NET source roots.
-2. Build the model and links:
-   ```
-   python .github/skills/impact-analysis/scripts/analyze_dotnet.py  --root <dotnet-root>  --out ./.impact-out/backend.json
-   python .github/skills/impact-analysis/scripts/analyze_angular.py --root <angular-root> --out ./.impact-out/frontend.json
-   python .github/skills/impact-analysis/scripts/link_cross_stack.py \
-     --backend ./.impact-out/backend.json --frontend ./.impact-out/frontend.json \
-     --out ./.impact-out/links.json
-   ```
-3. From `links.json`, report two tables:
-   - **Unused endpoints** — backend routes no frontend call appears to hit
-     (candidate dead code, or consumed by another client / service).
-   - **Unmatched frontend calls** — HTTP calls with no matching backend route
-     (broken or renamed endpoints, or genuinely external APIs).
-4. For each item, note the **likely cause** and a **suggested next check**.
+## Inputs
 
-Remind the reader these are heuristic: a `loose` matcher can miss routes that the
-frontend reaches through a runtime-injected base path, so confirm before deleting
-anything.
+* ${input:scope:auto}: (Optional, defaults to auto) App, release, environment, version, or `compare`.
+
+## Requirements
+
+1. Follow the `Impact Analyst` workspace and scope selection rules.
+2. Build or reuse a fresh model and link graph for the selected scope-specific
+  output folder.
+3. Report unused backend endpoints that no frontend call appears to hit.
+4. Report unmatched frontend calls that have no matching backend route.
+5. For each item, include the likely cause and a suggested next check.
+6. Remind the reader that static matching is heuristic and that runtime base
+  paths, external clients, or generated clients can change the conclusion.
