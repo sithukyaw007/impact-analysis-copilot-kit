@@ -1,0 +1,28 @@
+{
+  // Multi-root workspace for this sample impact-analysis repository.
+  // The repo contains two versions of the sample app. Keep both loaded to compare
+  // changes across v1 and v2, or remove whichever version you do not need.
+  "folders": [
+    { "name": "v1 Frontend (Angular)",      "path": "v1/web-frontend" },
+    { "name": "v1 Backend (.NET Core)",     "path": "v1/api-backend" },
+    { "name": "v2 Frontend (Angular)",      "path": "v2/web-frontend" },
+    { "name": "v2 Backend (.NET Core)",     "path": "v2/api-backend" },
+    { "name": "Impact outputs",             "path": "impact-outputs" },
+    { "name": "Dev tooling (Copilot kit)",  "path": ".github" }
+  ],
+
+  "settings": {
+    // Point Copilot at the kit customizations in this repository.
+    "chat.agentSkillsLocations": { ".github/skills/**": true },
+    "chat.promptFilesLocations": { ".github/prompts/**": true },
+    "chat.agentFilesLocations":  { ".github/agents/**": true },
+
+    // Optional: if all repos live under a common parent folder, also discover
+    // customizations from the parent repository root.
+    "chat.useCustomizationsInParentRepositories": true
+
+    // Tip: if you prefer NOT to use a repository .github folder, install the kit into your
+    // user profile instead (~/.copilot/skills, ~/.copilot/agents, ~/.copilot/prompts)
+    // and you can delete the three chat.*Locations lines above.
+  }
+}

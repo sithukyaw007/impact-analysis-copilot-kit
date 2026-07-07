@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+
+# VS Code local workspace state
+.vscode/
+*.code-workspace.*
+
+# .NET build output
+bin/
+obj/
+
+# Node and Angular local dependencies/build output
+node_modules/
+dist/
+coverage/
+.angular/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Local impact-analysis scratch output
+.impact-out/
+.out-*/
+
+# Logs
+*.log
