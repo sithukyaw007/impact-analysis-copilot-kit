@@ -10,7 +10,7 @@ keywords:
   - angular
   - dotnet
   - static analysis
-estimated_reading_time: 8
+estimated_reading_time: 9
 ---
 
 ## Overview
@@ -214,6 +214,49 @@ After the workspace loads and Copilot discovers the customizations, select the
 For an interactive request, ask the `Impact Analyst` agent a question such as
 "What breaks if I change `CustomerDto`?" or "Which frontend components call
 `GET /api/orders/{id}`?"
+
+## Sample Copilot prompts
+
+Use these prompts in GitHub Copilot Chat after selecting Agent mode or the
+`Impact Analyst` agent. They are intentionally explicit about scope because this
+workspace contains both `v1` and `v2` sample applications.
+
+### Analyze a DTO change in v2
+
+```text
+Use the Impact Analyst agent to analyze the impact of changing OrderDto in v2.
+Use v2/web-frontend and v2/api-backend. Refresh the model and summarize backend
+files, frontend files, cross-stack paths, unmatched frontend calls, and unused
+endpoints.
+```
+
+### Compare impact across v1 and v2
+
+```text
+Use the Impact Analyst agent to compare v1 and v2 impact for changing OrderDto.
+Run the impact analysis for v1/web-frontend plus v1/api-backend, then run it for
+v2/web-frontend plus v2/api-backend. Summarize what changed in backend files,
+frontend files, affected endpoints, cross-stack paths, unmatched frontend calls,
+and unused endpoints.
+```
+
+### Find integration gaps in v2
+
+```text
+Use the Impact Analyst agent to refresh the v2 cross-stack model. Build the API
+map for v2/web-frontend and v2/api-backend, then identify unmatched frontend
+calls and unused backend endpoints. Include the HTTP method, route, source file,
+controller action, and likely remediation for each gap.
+```
+
+### Trace an endpoint from frontend to backend
+
+```text
+Use the Impact Analyst agent to show which Angular files call GET
+/api/orders/{id} in v2 and which .NET controller action handles it. Include the
+match confidence, the Angular service or component import chain, and a short
+verification checklist.
+```
 
 ## Use the kit in another codebase
 
